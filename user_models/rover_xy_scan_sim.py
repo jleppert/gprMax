@@ -13,22 +13,26 @@ z_range = 0.3
 
 sim_resolution = 0.002
 
-x_profile_step_size = 0.005
-y_profile_step_size = 0.005
+x_profile_step_size = 0.01
+y_profile_step_size = 0.01
 antenna_height_from_halfspace = 0.005
 
 antenna_padding = 0.1
 free_space_in_z = 0.1
+
+output_scene_geometry = True
 
 x_profile_count = math.floor((x_range - (antenna_padding)) / x_profile_step_size)
 y_profile_count = math.floor((y_range - (antenna_padding)) / y_profile_step_size)
 
 print("Total profiles", x_profile_count * y_profile_count)
 
+started_at = str(int(time()))
+
 for x_profile in range(x_profile_count):
     for y_profile in range(y_profile_count):
-        output_path_data = fn.parent / ('rover_sim_' + str(int(time()))) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
-        output_path_geometry = fn.parent / ('rover_sim_' + str(int(time()))) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
+        output_path_data = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
+        output_path_geometry = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
 
         Path(output_path_data).mkdir(parents=True, exist_ok=True)
 
@@ -65,7 +69,7 @@ for x_profile in range(x_profile_count):
                                  filename=output_path_geometry,
                                  output_type='n')
 
-
-        scene.add(gv)
+        if(output_scene_geometry):
+            scene.add(gv)
 
         gprMax.run(scenes=[scene], n=1, gpu=True, geometry_only=False, outputfile=output_path_data, autotranslate=True)
