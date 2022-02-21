@@ -102,8 +102,8 @@ def merge_files(outputfiles, removefiles=False):
                 grp = fout.create_group(path)
                 availableoutputs = list(fin[path].keys())
                 for output in availableoutputs:
-                    grp.create_dataset(output, 
-                                       (fout.attrs['Iterations'], len(outputfiles)), 
+                    grp.create_dataset(output,
+                                       (fout.attrs['Iterations'], len(outputfiles)),
                                        dtype=fin[path + '/' + output].dtype)
 
         # For all receivers
@@ -130,6 +130,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     files = glob.glob(args.basefilename + '*.h5')
+    files.sort(key=os.path.getmtime)
+    print(files)
     outputfiles = [filename for filename in files if '_merged' not in filename]
     outputfiles.sort(key=natural_keys)
     merge_files(outputfiles, removefiles=args.remove_files)

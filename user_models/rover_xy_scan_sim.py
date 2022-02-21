@@ -13,24 +13,34 @@ z_range = 0.3
 
 sim_resolution = 0.002
 
-x_profile_step_size = 0.01
-y_profile_step_size = 0.01
+x_profile_step_size = 0.05
+y_profile_step_size = 0.05
 antenna_height_from_halfspace = 0.005
 
 antenna_padding = 0.1
 free_space_in_z = 0.1
 
-output_scene_geometry = True
+output_scene_geometry = False
 
-x_profile_count = math.floor((x_range - (antenna_padding)) / x_profile_step_size)
-y_profile_count = math.floor((y_range - (antenna_padding)) / y_profile_step_size)
+antenna_size_x = 0.17
+antenna_size_y = 0.108
+antenna_size_z = 0.045
+
+x_profile_count = math.floor((x_range - antenna_size_x) / x_profile_step_size)
+y_profile_count = math.floor((y_range - antenna_size_y) / y_profile_step_size)
+
+print("Number of x profiles", x_profile_count)
+print("Number of y profiles", y_profile_count)
+
+print("Max antenna center x position", x_profile_count * x_profile_step_size)
+print("Max antenna center y position", y_profile_count * y_profile_step_size)
 
 print("Total profiles", x_profile_count * y_profile_count)
 
 started_at = str(int(time()))
 
-for x_profile in range(x_profile_count):
-    for y_profile in range(y_profile_count):
+for y_profile in range(y_profile_count):
+    for x_profile in range(x_profile_count):
         output_path_data = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
         output_path_geometry = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
 
@@ -47,8 +57,9 @@ for x_profile in range(x_profile_count):
         scene.add(dxdydz)
         scene.add(time_window)
 
-        gssi_objects = antenna_like_GSSI_1500(antenna_padding + (x_profile * x_profile_step_size), antenna_padding + (y_profile * y_profile_step_size), (z_range - free_space_in_z) + antenna_height_from_halfspace, resolution=sim_resolution)
+        gssi_objects = antenna_like_GSSI_1500((antenna_size_x / 2) + (x_profile * x_profile_step_size), (antenna_size_y / 2) + (y_profile * y_profile_step_size), (z_range - free_space_in_z) + antenna_height_from_halfspace, resolution=sim_resolution)
         for obj in gssi_objects:
+            print(obj)
             scene.add(obj)
 
         halfspace_m = gprMax.Material(er=5, se=0.001, mr=1, sm=0, id='concrete')
@@ -72,4 +83,8 @@ for x_profile in range(x_profile_count):
         if(output_scene_geometry):
             scene.add(gv)
 
-        gprMax.run(scenes=[scene], n=1, gpu=True, geometry_only=False, outputfile=output_path_data, autotranslate=True)
+        try:
+            gprMax.run(scenes=[scene], n=1, gpu=True, geometry_only=False, outputfile=output_path_data)
+        except Exception as e:
+            print("Unable to generate profile for x, y", x_profile, y_profile)
+            print(e)
