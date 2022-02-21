@@ -1,4 +1,5 @@
 from pathlib import Path
+from time import time
 
 import math
 import gprMax
@@ -26,8 +27,10 @@ print("Total profiles", x_profile_count * y_profile_count)
 
 for x_profile in range(x_profile_count):
     for y_profile in range(y_profile_count):
-        output_path_data = fn.parent / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
-        output_path_geometry = fn.parent / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
+        output_path_data = fn.parent / ('rover_sim_' + str(int(time()))) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
+        output_path_geometry = fn.parent / ('rover_sim_' + str(int(time()))) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
+
+        Path(output_path_data).mkdir(parents=True, exist_ok=True)
 
         scene = gprMax.Scene()
         title = gprMax.Title(name=fn.with_suffix('').name + '-x' + str(x_profile) + '-y' + str(y_profile))
