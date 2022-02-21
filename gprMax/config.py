@@ -50,6 +50,8 @@ def get_model_config():
     else:
         return model_configs[model_num]
 
+from pprint import pprint
+
 class ModelConfig:
     """Configuration parameters for a model.
         N.B. Multiple models can exist within a simulation
@@ -60,7 +62,8 @@ class ModelConfig:
         self.mode = '3D'
         self.grids = []
         self.ompthreads = None
-
+        
+        pprint(vars(sim_config))
         # Store information for CUDA solver
         #   gpu: GPU object
         #   snapsgpu2cpu: copy snapshot data from GPU to CPU during simulation
@@ -68,8 +71,8 @@ class ModelConfig:
         #     on the memory of the GPU. If True this will slow performance significantly
         if sim_config.general['cuda']:
             # If a list of lists of GPU deviceIDs is found, flatten it
-            if any(isinstance(element, list) for element in sim_config.args.gpu):
-                deviceID = [val for sublist in sim_config.args.gpu for val in sublist]
+            if any(isinstance(element, list) for element in sim_config.cuda['gpus']):
+                deviceID = [val for sublist in sim_config.cuda['gpus'] for val in sublist]
 
             # If no deviceID is given default to using deviceID 0. Else if either
             # a single deviceID or list of deviceIDs is given use first one.
