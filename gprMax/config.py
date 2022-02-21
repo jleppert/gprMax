@@ -77,9 +77,9 @@ class ModelConfig:
             # If no deviceID is given default to using deviceID 0. Else if either
             # a single deviceID or list of deviceIDs is given use first one.
             try:
-                deviceID = deviceID[0]
+                deviceID = deviceID[2]
             except:
-                deviceID = 0
+                deviceID = 2
 
             self.cuda = {'gpu': sim_config.set_model_gpu(deviceID),
                          'snapsgpu2cpu': False}
