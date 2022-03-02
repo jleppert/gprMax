@@ -1,14 +1,17 @@
 from pathlib import Path
 from time import time
 
+import os
+import sys
+
 import math
 import gprMax
 from user_libs.GPRAntennaModels.GSSI import antenna_like_GSSI_1500
 
 fn = Path(__file__)
 
-x_range = 0.480
-y_range = 0.148
+x_range = 0.6985
+y_range = 0.3000
 z_range = 0.3
 
 sim_resolution = 0.001
@@ -16,7 +19,6 @@ sim_resolution = 0.001
 x_profile_step_size = 0.005
 y_profile_step_size = 0.005
 antenna_height_from_halfspace = 0
-
 
 free_space_in_z = 0.1
 
@@ -27,9 +29,9 @@ antenna_size_y = 0.108
 antenna_size_z = 0.045
 
 antenna_padding_x = 0.005
-antenna_padding_y = (y_range - antenna_size_y) / 2
+antenna_padding_y = 0.005
 
-target_count = 3
+target_count = 8
 
 x_profile_count = math.floor((x_range - (antenna_padding_x * 2) - antenna_size_x) / x_profile_step_size)
 y_profile_count = math.floor((y_range - (antenna_padding_y * 2) - antenna_size_y) / y_profile_step_size)
@@ -42,13 +44,15 @@ print("Max antenna center y position", y_profile_count * y_profile_step_size)
 
 print("Total profiles", x_profile_count * y_profile_count)
 
-started_at = str(int(time()))
+suffix = sys.argv[1]
 
-y_profile_count = 1
 for y_profile in range(y_profile_count):
     for x_profile in range(x_profile_count):
-        output_path_data = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
-        output_path_geometry = fn.parent / ('rover_sim_' + started_at) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
+        output_path_data = fn.parent / ('rover_sim_' + suffix) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile))
+        output_path_geometry = fn.parent / ('rover_sim_' + suffix) / (fn.stem + '-x' + str(x_profile) + '-y' + str(y_profile) + '-geometry')
+
+        if(os.path.isdir(output_path_data)):
+            continue
 
         Path(output_path_data).mkdir(parents=True, exist_ok=True)
 
@@ -74,11 +78,12 @@ for y_profile in range(y_profile_count):
         halfspace = gprMax.Box(p1=(0, 0, 0), p2=(x_range, y_range, z_range - free_space_in_z), material_id='concrete')
         scene.add(halfspace)
 
-        #target_x_spacing = (x_range / target_count)
-        #for x in range(target_count):
-        #    x = x + 1
-        target = gprMax.Cylinder(p1=(x_range / 2, 0, 0.1), p2=(x_range / 2, y_range, 0.1), r=0.010, material_id='pec');
-        scene.add(target)
+        target_x_spacing = ((x_range - 0.1) / target_count)
+        print("target x", target_x_spacing)
+        for x in range(target_count):
+            x = x + 1
+            target = gprMax.Cylinder(p1=(target_x_spacing * x, 0, 0.1), p2=(target_x_spacing * x, y_range, 0.1), r=0.010, material_id='pec');
+            scene.add(target)
 
         gv = gprMax.GeometryView(p1=(0, 0, 0),
                                  p2=(x_range, y_range, z_range),

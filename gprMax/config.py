@@ -18,6 +18,7 @@
 
 import logging
 import sys
+import os
 from pathlib import Path
 
 import cython
@@ -62,7 +63,7 @@ class ModelConfig:
         self.mode = '3D'
         self.grids = []
         self.ompthreads = None
-        
+
         pprint(vars(sim_config))
         # Store information for CUDA solver
         #   gpu: GPU object
@@ -76,13 +77,9 @@ class ModelConfig:
 
             # If no deviceID is given default to using deviceID 0. Else if either
             # a single deviceID or list of deviceIDs is given use first one.
-            try:
-                deviceID = deviceID[2]
-            except:
-                deviceID = 2
 
-            self.cuda = {'gpu': sim_config.set_model_gpu(deviceID),
-                         'snapsgpu2cpu': False}
+            self.cuda = {'gpu': sim_config.set_model_gpu(int(os.environ['GPU_DEVICE_ID'])),
+                         'snapsgpu2cpu': True }
 
         # Total memory usage for all grids in the model. Starts with 50MB overhead.
         self.mem_overhead = 50e6
